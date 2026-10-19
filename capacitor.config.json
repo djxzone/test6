@@ -1,0 +1,6 @@
+{
+  "appId": "xyz.lexo.test6",
+  "appName": "test 6",
+  "webDir": "www",
+  "server": { "androidScheme": "https" }
+}

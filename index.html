@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E1022">
+<title>test 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E1022;--card:#181C37;--line:#2A3059;--ink:#F2F3FA;--mute:#9AA0C8;--a:#7C5CFF;--b:#3EA6FF;--ok:#3FD6A0;--mid:#F2C14E;--bad:#FF7A8A}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(900px 500px at 50% -10%,#232957 0,var(--bg) 60%) no-repeat,var(--bg);color:var(--ink);font-family:Cairo,system-ui,Tahoma,sans-serif;display:flex;flex-direction:column;align-items:center;padding:max(44px,env(safe-area-inset-top),var(--safe-area-inset-top,0px)) 18px max(24px,env(safe-area-inset-bottom),var(--safe-area-inset-bottom,0px))}
+main{width:100%;max-width:480px;flex:1}
+.logo{width:84px;height:84px;border-radius:50%;margin:8px auto 14px;display:grid;place-items:center;font-size:44px;font-weight:800;background:linear-gradient(135deg,var(--a),var(--b));box-shadow:0 8px 30px #7c5cff55}
+h1{text-align:center;font-size:26px;margin:0 0 6px;font-weight:800}
+.lead{text-align:center;color:var(--mute);font-size:15px;margin:0 0 20px}
+button{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:800 17px Cairo,sans-serif;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--a),var(--b))}
+button:disabled{opacity:.55}
+button:focus-visible,a:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+#status{text-align:center;color:var(--mute);font-size:14px;min-height:22px;margin:10px 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
+.card h2{font-size:16px;margin:0 0 2px}
+.hint{color:var(--mute);font-size:12.5px;margin:0 0 6px;min-height:18px}
+.big{font-size:64px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;direction:ltr;text-align:center}
+.unit{text-align:center;color:var(--mute);font-size:14px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.s{background:#0E1230;border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+.s b{display:block;font-size:20px;direction:ltr;font-variant-numeric:tabular-nums}
+.s span{color:var(--mute);font-size:12.5px}
+ul{list-style:none;margin:12px 0 0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line);font-size:15px}
+li:last-child{border-bottom:0}
+.r{direction:ltr;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)}.mid{color:var(--mid)}.bad{color:var(--bad)}.w{color:var(--mute)}
+footer{margin-top:26px;text-align:center;color:var(--mute);font-size:14px}
+footer a{color:var(--b);text-decoration:none;font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <div class="logo" aria-hidden="true">6</div>
+  <h1>test 6</h1>
+  <p class="lead">افحص سرعة الإنترنت وسرعة عرض نجمة 6 لمواقع التواصل</p>
+  <button id="go">ابدأ الفحص</button>
+  <div id="status" role="status">جاهز</div>
+
+  <section class="card">
+    <h2>الإنترنت العام</h2>
+    <p class="hint" id="gh">&nbsp;</p>
+    <div class="big" id="gnum">0</div><div class="unit">Mbps تحميل</div>
+    <div class="row">
+      <div class="s"><b id="gping">—</b><span>زمن الاستجابة ms</span></div>
+      <div class="s"><b id="gup">—</b><span>الرفع Mbps</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>عرض نجمة 6 (مواقع التواصل)</h2>
+    <p class="hint" id="sh">&nbsp;</p>
+    <div class="big" id="snum">0</div><div class="unit">Mbps تحميل</div>
+    <div class="row">
+      <div class="s"><b id="sping">—</b><span>زمن الاستجابة ms</span></div>
+      <div class="s"><b id="scount">—</b><span>مواقع تعمل</span></div>
+    </div>
+    <ul id="sites"></ul>
+  </section>
+</main>
+
+<footer>Dev:LexoExyz<br><a href="https://lexo-panel.onrender.com/" target="_blank" rel="noopener">https://lexo-panel.onrender.com/</a></footer>
+
+<script>
+var $ = function(s){return document.querySelector(s)};
+var CF = 'https://speed.cloudflare.com/';
+var SITES = [
+  ['فيسبوك','https://www.facebook.com/'],
+  ['إنستغرام','https://www.instagram.com/'],
+  ['واتساب','https://www.whatsapp.com/'],
+  ['تيك توك','https://www.tiktok.com/'],
+  ['يوتيوب','https://www.youtube.com/']
+];
+function T(ms){var c=new AbortController();setTimeout(function(){c.abort()},ms);return c.signal}
+function fmt(v){return v>=100?String(Math.round(v)):v.toFixed(1)}
+function grade(mbps,ms){
+  if(mbps!==null) return mbps>=5?'ok':mbps>=1?'mid':'bad';
+  return ms<600?'ok':ms<1500?'mid':'bad';
+}
+
+async function pingTest(){
+  var t=[];
+  for(var i=0;i<5;i++){
+    var s=performance.now();
+    try{await fetch(CF+'__down?bytes=0&r='+Math.random(),{cache:'no-store',signal:T(6000)});t.push(performance.now()-s)}catch(e){}
+  }
+  if(!t.length) return null;
+  t.sort(function(a,b){return a-b});
+  return Math.round(t[Math.floor(t.length/2)]);
+}
+
+async function downloadTest(){
+  var ctrl=new AbortController(), bytes=0, start=performance.now();
+  var stop=setTimeout(function(){ctrl.abort()},8000);
+  var tick=setInterval(function(){$('#gnum').textContent=fmt(bytes*8/((performance.now()-start)/1000)/1e6)},200);
+  async function one(){
+    try{
+      var r=await fetch(CF+'__down?bytes=50000000&r='+Math.random(),{cache:'no-store',signal:ctrl.signal});
+      if(r.body&&r.body.getReader){
+        var rd=r.body.getReader();
+        for(;;){var x=await rd.read();if(x.done)break;bytes+=x.value.length}
+      } else { bytes+=(await r.arrayBuffer()).byteLength }
+    }catch(e){}
+  }
+  await Promise.all([one(),one(),one(),one()]);
+  clearTimeout(stop);clearInterval(tick);
+  return bytes? bytes*8/((performance.now()-start)/1000)/1e6 : null;
+}
+
+async function uploadTest(){
+  var blob=new Blob([new Uint8Array(3e6)]), s=performance.now();
+  try{
+    await Promise.all([1,2,3].map(function(){return fetch(CF+'__up',{method:'POST',body:blob,cache:'no-store',signal:T(15000)})}));
+  }catch(e){return null}
+  return 9e6*8/((performance.now()-s)/1000)/1e6;
+}
+
+/* Social: first try a readable download (works inside the APK with native HTTP,
+   where CORS does not apply). If the browser blocks reading, fall back to response time only. */
+async function measureSite(url){
+  var H=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CapacitorHttp;
+  if(H){
+    var n0=performance.now(), fastest=null;
+    try{
+      var rs=await Promise.all([0,1,2,3].map(function(){
+        return H.get({url:url+'?r='+Math.random(),headers:{'Accept-Encoding':'identity'},connectTimeout:8000,readTimeout:10000}).then(function(r){
+          var e=performance.now()-n0; if(fastest===null||e<fastest) fastest=e; return r;
+        });
+      }));
+      var total=0;
+      rs.forEach(function(r){var d=typeof r.data==='string'?r.data:JSON.stringify(r.data||'');total+=new Blob([d]).size});
+      var secs=(performance.now()-n0)/1000;
+      if(total>0) return {ms:Math.round(fastest),mbps:total*8/secs/1e6};
+    }catch(e){}
+  }
+  var t0=performance.now(), first=null;
+  try{
+    var sizes=await Promise.all([0,1,2,3].map(async function(){
+      var r=await fetch(url+'?r='+Math.random(),{cache:'no-store',headers:{'Accept-Encoding':'identity'},signal:T(10000)});
+      if(first===null) first=performance.now()-t0;
+      return (await r.arrayBuffer()).byteLength;
+    }));
+    var total=sizes.reduce(function(a,b){return a+b},0);
+    if(total>0) return {ms:Math.round(first),mbps:total*8/((performance.now()-t0)/1000)/1e6};
+  }catch(e){}
+  var best=null;
+  for(var i=0;i<2;i++){
+    var s=performance.now();
+    try{
+      await fetch(url+'favicon.ico?r='+Math.random(),{mode:'no-cors',cache:'no-store',signal:T(5000)});
+      var d=performance.now()-s; if(best===null||d<best) best=d;
+    }catch(e){}
+  }
+  return best===null?null:{ms:Math.round(best),mbps:null};
+}
+
+function drawSites(res){
+  $('#sites').innerHTML=SITES.map(function(s,i){
+    var x=res?res[i]:undefined, t='…', c='w';
+    if(x===null){t='لا يعمل';c='bad'}
+    else if(x){
+      t=(x.mbps!==null?fmt(x.mbps)+' Mbps · ':'')+x.ms+' ms';
+      c=grade(x.mbps,x.ms);
+    }
+    return '<li><span>'+s[0]+'</span><span class="r '+c+'">'+t+'</span></li>';
+  }).join('');
+}
+
+$('#go').onclick=async function(){
+  var btn=$('#go'), st=$('#status');
+  btn.disabled=true;
+  ['#gnum','#snum'].forEach(function(i){$(i).textContent='0'});
+  ['#gping','#gup','#sping','#scount'].forEach(function(i){$(i).textContent='—'});
+  $('#gh').innerHTML='&nbsp;';$('#sh').innerHTML='&nbsp;';
+  drawSites(null);
+
+  st.textContent='قياس زمن الاستجابة…';
+  var ping=await pingTest();
+  if(ping!==null){
+    $('#gping').textContent=ping;
+    st.textContent='قياس التحميل…';
+    var dl=await downloadTest();
+    $('#gnum').textContent=dl===null?'—':fmt(dl);
+    st.textContent='قياس الرفع…';
+    var up=await uploadTest();
+    $('#gup').textContent=up===null?'—':fmt(up);
+  } else {
+    $('#gnum').textContent='—';
+    $('#gh').textContent='الإنترنت العام غير متاح (طبيعي مع عرض نجمة 6)';
+  }
+
+  st.textContent='فحص مواقع التواصل…';
+  var res=await Promise.all(SITES.map(function(s){return measureSite(s[1])}));
+  drawSites(res);
+  var ok=res.filter(function(x){return x}), sp=ok.filter(function(x){return x.mbps!==null});
+  $('#scount').textContent=ok.length+'/'+SITES.length;
+  if(ok.length) $('#sping').textContent=Math.round(ok.reduce(function(a,x){return a+x.ms},0)/ok.length);
+  if(sp.length){
+    $('#snum').textContent=fmt(sp.reduce(function(a,x){return a+x.mbps},0)/sp.length);
+  } else {
+    $('#snum').textContent='—';
+    $('#sh').textContent=ok.length?'قياس الميغابت يعمل داخل التطبيق فقط، هنا يظهر زمن الاستجابة':'لا تعمل مواقع التواصل، تأكد من تفعيل عرض نجمة 6';
+  }
+  st.textContent='انتهى الفحص';
+  btn.textContent='أعد الفحص';
+  btn.disabled=false;
+};
+drawSites(null);
+</script>
+</body>
+</html>
